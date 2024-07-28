@@ -1,9 +1,22 @@
 import tkinter as tk
 from elevate import elevate
 import os
+import ctypes
 
-# Elevate to administrative privileges
-elevate()
+# Attempt to elevate to administrative privileges
+elevated = True
+try:
+    elevate()
+except OSError as e:
+    if e.winerror == 1223:  # The operation was canceled by the user
+        elevated = False
+
+# Check for administrative privileges
+def is_admin():
+    try:
+        return os.getuid() == 0
+    except AttributeError:
+        return ctypes.windll.shell32.IsUserAnAdmin() != 0
 
 # Function to center the window on the screen and set its width 10% larger than its content
 def center_window(root, width_increase_ratio=0.1):
@@ -39,6 +52,8 @@ def update_label(message):
 # Define the functions to be triggered
 def block():
     text_to_write = """
+# Copyright (c) 1993-2009 Microsoft Corp.
+#
 # This is a sample HOSTS file used by Microsoft TCP/IP for Windows.
 #
 # This file contains the mappings of IP addresses to host names. Each
@@ -343,6 +358,8 @@ def block():
 
 def unblock():
     text_to_write = """
+# Copyright (c) 1993-2009 Microsoft Corp.
+#
 # This is a sample HOSTS file used by Microsoft TCP/IP for Windows.
 #
 # This file contains the mappings of IP addresses to host names. Each
@@ -394,6 +411,13 @@ button2.pack(side=tk.RIGHT, padx=20, pady=20)
 # Create a label to display the result at the bottom
 result_label = tk.Label(root, text="", height=2, relief=tk.SUNKEN)
 result_label.pack(side=tk.BOTTOM, fill=tk.X, padx=10, pady=10)
+
+# Check for administrative privileges
+if not elevated or not is_admin():
+    button1.config(state=tk.DISABLED)
+    button2.config(state=tk.DISABLED)
+    update_label("You need to run with administrative privileges.")
+    root.deiconify()  # Ensure the window is shown and not minimized
 
 # Center the window and set the minimum size
 center_window(root)
