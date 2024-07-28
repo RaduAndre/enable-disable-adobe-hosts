@@ -5,11 +5,11 @@ import ctypes
 
 # Attempt to elevate to administrative privileges
 elevated = True
-try:
-    elevate()
-except OSError as e:
-    if e.winerror == 1223:  # The operation was canceled by the user
-        elevated = False
+# try:
+#     elevate()
+# except OSError as e:
+#     if e.winerror == 1223:  # The operation was canceled by the user
+#         elevated = False
 
 # Check for administrative privileges
 def is_admin():
